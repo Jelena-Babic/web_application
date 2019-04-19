@@ -1,5 +1,5 @@
 <template>
-  <div class="card" style=" width:350px; height:800px; border: 2px">
+  <div class="card" style=" width:465px; height:400px; border: 2px">
     <div class="card-header" style="text-align: left;
     font-size: 30px;
     font-weight: bolder;
@@ -10,17 +10,21 @@
       <table class="table table-bordered">
         <thead>
         <tr>
-          <th>Index:</th>
+          <th>Id:</th>
           <th>Date:</th>
           <th>Value</th>
+          <th>Status:</th>
+          <th>Limit:</th>
         </tr>
         </thead>
 
         <tbody v-for="(element,index) in data_array">
         <tr v-if="((index >=currentRow) && (index<currentRow + rowsPerPage))">
           <th scope="row">{{index + 1}}</th>
-          <td>{{element.data.date}}</td>
-          <td>{{element.data.value}}</td>
+          <td>{{element.date}}</td>
+          <td>{{element.value.toFixed(2)}}</td>
+          <td>{{element.status}}</td>
+          <td>{{element.limit}}</td>
         </tr>
         </tbody>
       </table>
@@ -80,7 +84,7 @@
       return {
         currentRow: 0,
         firstPage: 0,
-        rowsPerPage: 14
+        rowsPerPage: 5
       }
     },
     methods: {
@@ -101,8 +105,7 @@
 <style scoped>
   .child {
     position: absolute;
-    margin-left: 100px;
-    margin-bottom: 20px;
+    margin-left: 130px;
     bottom: 0;
   }
 

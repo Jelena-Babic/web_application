@@ -1,25 +1,77 @@
 <template>
-  <div class="row" id="messageLog" style="margin-top: 20px; margin-left:20px; padding-right: 30px ">
-    <div class="span3" style="margin-top: 20px; margin-right: 30px">
-      <message-list :title="title1" :data_array="speed_data"></message-list>
+  <div id="message_log" >
+  <div class="card" style="margin-left: 30px; width: 1460px; border: none; margin-top: 20px">
+    <div class="card-header"
+         style="border: none;
+             background-color: darkseagreen;
+              font-size: 30px">
+      <h1>Left Side</h1></div>
+    <div class="card-body" style="background-color: #F2F4F5; border: none">
+      <div class="row">
+        <div class="span3" style="margin-top: 5px; margin-right: 30px">
+          <message-list :title="title1" :data_array="left_side.speed_data"></message-list>
+        </div>
+        <div class="span3" style="margin-top: 5px; margin-right: 30px">
+          <message-list :title="title2" :data_array="left_side.temperature_data"></message-list>
+        </div>
+        <div class="span3" style="margin-top: 5px">
+          <message-list :title="title3" :data_array="left_side.current_data"></message-list>
+        </div>
+      </div>
     </div>
-    <div class="span3" style="margin-top: 20px; margin-right: 30px">
-      <message-list :title="title2" :data_array="temperature_data"></message-list>
-    </div>
-    <div class="span3" style="margin-top: 20px; margin-right: 30px">
-      <message-list :title="title3" :data_array="current_data"></message-list>
-    </div>
-    <div class="span3" style="margin-top: 20px">
-      <message-list :title="title4" :data_array="command_data"></message-list>
-    </div>
+  </div>
+
+  <div class="card" style="margin-left: 30px; width: 1460px; border: none; margin-top: 10px">
+    <div class="card-header"
+         style="border: none;
+             background-color: darkseagreen;
+             font-weight: bolder;
+              font-size: 30px">
+      <h1>Right Side</h1></div>
+    <div class="card-body" style="background-color: #F2F4F5; border: none">
+      <div class="row">
+        <div class="span3" style="margin-top: 5px; margin-right: 30px">
+          <message-list :title="title1" :data_array="right_side.speed_data"></message-list>
+        </div>
+        <div class="span3" style="margin-top: 5px; margin-right: 30px">
+          <message-list :title="title2" :data_array="right_side.temperature_data"></message-list>
+        </div>
+        <div class="span3" style="margin-top: 5px">
+          <message-list :title="title3" :data_array="right_side.current_data"></message-list>
+        </div>
+      </div>
+
+    <div class="card" style="margin-left: 30px; width: 1460px; border: none; margin-top: 10px">
+      <div class="card-header"
+           style="border: none;
+             background-color: darkseagreen;
+             font-weight: bolder;
+              font-size: 30px">
+        <h1>Commands </h1></div>
+      <div class="card-body" style="background-color: #F2F4F5; border: none">
+        <div class="row">
+          <div class="span3" style="margin-top: 5px; margin-right: 30px">
+            <message-list :title="title1" :data_array="right_side.speed_data"></message-list>
+          </div>
+          <div class="span3" style="margin-top: 5px; margin-right: 30px">
+            <message-list :title="title2" :data_array="right_side.temperature_data"></message-list>
+          </div>
+          <div class="span3" style="margin-top: 5px">
+            <message-list :title="title3" :data_array="right_side.current_data"></message-list>
+          </div>
+        </div>
+      </div>
+
+  </div>
+  </div>
+  </div>
   </div>
 </template>
 
 <script>
   import MessageList from './elements/MessageList.vue'
   import {message_log} from "../deviceData";
-  import {baseNames} from "../constants";
-  import {db} from "../main";
+  import {getMessageLog} from "../databaseFunctions";
 
   export default {
     name: "MessageLog",
@@ -33,46 +85,32 @@
         title3: 'Current Log',
         title4: 'Limits Log',
 
-        speed_data:message_log.speed_log,
-        temperature_data:message_log.temperature_log,
-        current_data:message_log.current_log,
-        command_data:message_log.command_log,
+        left_side: {
+          speed_data: message_log.left_side.speed_log,
+          temperature_data: message_log.left_side.temperature_log,
+          current_data: message_log.left_side.current_log,
+          command_data: message_log.command_log,
+        },
 
+        right_side: {
+          speed_data: message_log.right_side.speed_log,
+          temperature_data: message_log.right_side.temperature_log,
+          current_data: message_log.right_side.current_log,
+          command_data: message_log.command_log,
+        }
       }
     },
-    mounted(){
-      this.getDatabase(baseNames.speed_base,message_log.speed_log);
-      this.getDatabase(baseNames.temperature_base,message_log.temperature_log);
-      this.getDatabase(baseNames.current_base,message_log.current_log);
-      this.getDatabase(baseNames.command_base,message_log.command_log);
-
-      console.log(message_log.speed_log);
-    },
     created(){
-      console.log('message list created');
+
+      getMessageLog();
+     // console.log('message log is',message_log);
+    },
+    mounted(){
+      console.log('this is message log speed data',this.$data.speed_data);
     },
     beforeDestroy() {
       console.log('message list destroy');
     },
-    methods:{
-
-      getDatabase(basename, database) {
-        var local_database = db.collection(basename);
-        var myDataArray = local_database.orderBy("data", "desc").limit(20);
-        var configList = myDataArray.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              var myData = doc.data();
-              // console.log({x: this.$moment(myData.data.date), y: myData.data.value});
-              database.push(myData);
-              //database.unshift({x:this.$moment(myData.data.date),y:myData.data.value});
-            })
-          })
-          .catch(err => {
-            console.log('Error getting database', err);
-          });
-      }
-    }
 
   }
 

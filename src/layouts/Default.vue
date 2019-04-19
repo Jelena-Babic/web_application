@@ -10,9 +10,10 @@
 <script>
   import Sidebar from '../components/Sidebar.vue'
   import {eventBus} from "../main";
-  import {db} from "../main";
-  import {events, limitEvents, baseNames, getValue, deviceValues, database_configuration} from "../constants";
-  import {speedData, currentData, temperatureData} from '../deviceData';
+  import {events, limitEvents, baseNames, getValue, deviceValues, limitTypes} from "../constants";
+  import {database_index, database_values} from '../deviceData';
+  import {getDatabaseIndexes, getLatestEntries, writeInBase, setDatabaseIndexes} from "../databaseFunctions";
+  import axios from 'axios'
 
 
   export default {
@@ -21,204 +22,350 @@
       app_sidebar: Sidebar
     },
     data() {
-      return {
-        base_index: {
-          speed_index: 0,
-          current_index: 0,
-          temperature_index: 0,
-          command_index: 0,
-        },
-        limits: {
-          speed_limit: deviceValues.speed,
-          current_limit: deviceValues.current,
-          temperature_limit: deviceValues.temperature,
-        },
-        mySpeedIndex:20
-      }
+      return {}
     },
     created() {
       console.log('app created');
-      this.getConfiguration();
-      this.getDatabase('speed', speedData);
-      this.getDatabase('current', currentData);
-      this.getDatabase('temperature', temperatureData);
+      getDatabaseIndexes();
+      getLatestEntries();
+      console.log('this is home database values',database_values);
+      console.log('created.local.index', database_index);
 
-      // console.log(speedData);
-      // console.log(currentData);
-      // console.log(temperatureData);
+      this.sendHttpCommand();
+
     },
     beforeDestroy() {
-      speedData.splice(0, 20);
-      currentData.splice(0, 20);;
-      temperatureData.splice(0, 20);
-      this.updateConfiguration();
+      setDatabaseIndexes();
     },
     mounted() {
-      console.log('app mounted');
 
       this.$mqtt.subscribe('#');
+      this.$events.on(events.command, (data) => {
+        console.log('Command Received', data);
+        this.processCommand(data);
+      });
 
-      eventBus.$on(events.command, (data) => {
-        console.log('Command received');
+    },
+    mqtt: {
+
+      'Temperature measurement'(data) {
+        //console.log('Temperature Sample');
+        this.processSample(data, 'Temperature');
+      },
+      'Current measurement'(data) {
+     //   console.log('Current sample')
+         this.processSample(data, 'Current');
+      },
+      'MotorSpeed'(data) {
+     //   console.log('Speed sample');
+      //  console.log(JSON.parse(data));
+         this.processSample(data, 'Speed');
+      }
+
+    },
+    methods: {
+
+      processSample(data, data_type) {
+        var temp_obj = JSON.parse(data);
 
         var baseData = {
-          date: data.date,
-          type: data.type,
-          user: data.user,
-          value: data.limit
+          date: this.$moment(Date.now()).format("DD/MM/YYYY hh:mm:ss"),
+          limit: '0',
+          status: 'Normal',
+          value: '0'
         };
 
-        this.$data.base_index.command_index = database_configuration.command_index;
-        database_configuration.command_index = database_configuration.command_index + 1;
-
-        this.writeInBase(baseNames.command_base, this.$data.base_index.command_index, baseData);
-        // console.log(baseData);
-
-        switch (baseData.type) {
+        switch (data_type) {
           case 'Temperature': {
-            this.$data.limits.temperature_limit = baseData.value;
-            deviceValues.temperature = baseData.value;
-            console.log('temperature is set');
-            console.log(getValue(baseData.type, baseData.value));
-            this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
-           // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
-            break;
-          }
-          case 'Speed': {
-            this.$data.limits.speed_limit = baseData.value;
-            deviceValues.speed = baseData.value;
-            this.$events.emit(limitEvents.speed, getValue(baseData.type, baseData.value));
-           // eventBus.$emit(limitEvents.speed, getValue(baseData.type, baseData.value));
+
+            baseData.value = temp_obj.SensorValue;
+
+            if (temp_obj.ControlUnit == 'Left')
+            {
+              baseData.limit = database_values.limit_value.left_side.temperature.value_val;
+              baseData.status = baseData.limit >= baseData.value ? 'Normal' : 'Overload';
+
+              console.log('temperature log left base data', baseData);
+
+              writeInBase(baseNames.sample_base.left_side.temperature_base,
+                ++database_index.sample_index.left_side.temperature_index,
+                baseData);
+
+              this.$events.emit(events.left_side.temperature, baseData);
+            }
+            else {
+              baseData.limit = database_values.limit_value.right_side.temperature.value_val;
+              baseData.status = baseData.limit >= baseData.value ? 'Normal' : 'Overload';
+
+              writeInBase(baseNames.sample_base.right_side.temperature_base,
+                ++database_index.sample_index.right_side.temperature_index,
+                baseData);
+
+              this.$events.emit(events.right_side.temperature, baseData);
+
+            }
             break;
           }
           case 'Current': {
-            this.$data.limits.current_limit = baseData.value;
-            deviceValues.current = baseData.value;
-            this.$events.emit(limitEvents.current, getValue(baseData.type, baseData.value));
-            // eventBus.$emit(limitEvents.current, getValue(baseData.type, baseData.value));
+            baseData.value = temp_obj.SensorValue;
+
+            if (temp_obj.ControlUnit == 'Left') {
+              baseData.limit = database_values.limit_value.left_side.current.value_val;
+              baseData.status = baseData.limit >= Math.abs(baseData.value) ? 'Normal' : 'Overload';
+
+              writeInBase(baseNames.sample_base.left_side.current_base,
+                ++database_index.sample_index.left_side.current_index,
+                baseData);
+
+              this.$events.emit(events.left_side.current, baseData);
+
+            }
+            else {
+              baseData.limit = database_values.limit_value.right_side.current.value_val;
+              baseData.status = baseData.limit >= Math.abs(baseData.value)  ? 'Normal' : 'Overload';
+
+              writeInBase(baseNames.sample_base.right_side.current_base,
+                ++database_index.sample_index.right_side.current_index,
+                baseData);
+
+              this.$events.emit(events.right_side.current, baseData);
+            }
+            break;
+          }
+          case 'Speed': {
+
+            baseData.value = temp_obj.ParameterValue;
+
+            if (temp_obj.ControlUnit == 'Left') {
+              baseData.limit = database_values.limit_value.left_side.speed.value_val;
+              baseData.status = baseData.limit >= baseData.value ? 'Normal' : 'Overload';
+
+              writeInBase(baseNames.sample_base.left_side.speed_base,
+                ++database_index.sample_index.left_side.speed_index,
+                baseData);
+
+              this.$events.emit(events.left_side.speed, baseData);
+
+            } else {
+              baseData.limit = database_values.limit_value.right_side.speed.value_val;
+              baseData.status = baseData.limit >= baseData.value ? 'Normal' : 'Overload';
+
+              writeInBase(baseNames.sample_base.right_side.speed_base,
+                ++database_index.sample_index.right_side.speed_index,
+                baseData);
+
+              this.$events.emit(events.right_side.speed, baseData);
+            }
+            break;
+          }
+
+        }
+
+       // console.log('sample data', baseData);
+
+      },
+
+      processCommand(data) {
+
+        console.log('this is base data from process command', data);
+
+        var baseData = {
+          date: data.date,
+          user: data.user,
+          value: data.limit,
+          value_val: getValue(data.type, data.limit)
+        };
+
+        var commandData = {
+          date: data.date,
+          user: data.user,
+          type: data.type,
+          value: data.limit,
+          value_val: getValue(data.type, data.limit)
+        }
+
+        writeInBase(baseNames.command_base, ++database_index.command_index, commandData);
+        // console.log(baseData);
+
+        switch (data.type) {
+          case limitTypes.left_side.temperature: {
+            console.log('left temperature is set');
+
+            writeInBase(baseNames.limit_base.left_side.temperature_base,
+              ++database_index.limit_index.left_side.temperature_index, baseData);
+            console.log('New temperature index is ', database_index.limit_index.left_side.temperature_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+                  "ServiceParameterLimits":
+                    [
+                      {
+                        "ControlUnit": "Left",
+                        "ParameterUnit": "Celsius",
+                        "ParameterLimit": baseData.value_val
+                      },
+                    ]
+                  })
+                  .then(response => {
+                  })
+                  .catch(e => {
+                    this.errors.push(e)
+                  });
+            break;
+          }
+          case limitTypes.left_side.speed: {
+            console.log('left speed is set');
+
+            writeInBase(baseNames.limit_base.left_side.speed_base,
+              ++database_index.limit_index.left_side.speed_index, baseData);
+
+            console.log('New speed index is ', database_index.limit_index.left_side.speed_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+              "ServiceParameterLimits":
+                [
+                  {
+                    "ControlUnit": "Left",
+                    "ParameterUnit": "RPM",
+                    "ParameterLimit": baseData.value_val
+                  },
+                ]
+            })
+              .then(response => {
+              })
+              .catch(e => {
+                this.errors.push(e)
+              });
+
+
+            break;
+          }
+          case limitTypes.left_side.current: {
+            console.log('left current is set');
+
+            writeInBase(baseNames.limit_base.left_side.current_base,
+              ++database_index.limit_index.left_side.current_index, baseData);
+
+            console.log('New current index is ', database_index.limit_index.left_side.current_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+              "ServiceParameterLimits":
+                [
+                  {
+                    "ControlUnit": "Left",
+                    "ParameterUnit": "mA",
+                    "ParameterLimit": baseData.value_val
+                  },
+                ]
+            })
+              .then(response => {
+              })
+              .catch(e => {
+                this.errors.push(e)
+              });
+
+
+            break;
+          }
+          case limitTypes.right_side.temperature: {
+            console.log('left temperature is set');
+
+            writeInBase(baseNames.limit_base.right_side.temperature_base,
+              ++database_index.limit_index.right_side.temperature_index, baseData);
+
+            console.log('New temperature index is ', database_index.limit_index.right_side.temperature_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+              "ServiceParameterLimits":
+                [
+                  {
+                    "ControlUnit": "Right",
+                    "ParameterUnit": "Celsius",
+                    "ParameterLimit": baseData.value_val
+                  },
+                ]
+            })
+              .then(response => {
+              })
+              .catch(e => {
+                this.errors.push(e)
+              });
+
+
+            break;
+          }
+          case limitTypes.right_side.speed: {
+            console.log('left speed is set');
+
+            writeInBase(baseNames.limit_base.right_side.speed_base,
+              ++database_index.limit_index.right_side.speed_index, baseData);
+
+            console.log('New speed index is ', database_index.limit_index.right_side.speed_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+              "ServiceParameterLimits":
+                [
+                  {
+                    "ControlUnit": "Right",
+                    "ParameterUnit": "RPM",
+                    "ParameterLimit": baseData.value_val
+                  },
+                ]
+            })
+              .then(response => {
+              })
+              .catch(e => {
+                this.errors.push(e)
+              });
+
+
+            break;
+          }
+          case limitTypes.right_side.current: {
+            console.log('left current is set');
+
+            writeInBase(baseNames.limit_base.right_side.current_base,
+              ++database_index.limit_index.right_side.current_index, baseData);
+
+            console.log('New current index is ', database_index.limit_index.right_side.current_index);
+            // this.$events.emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+            // eventBus.$emit(limitEvents.temperature, getValue(baseData.type, baseData.value));
+
+            axios.post(`http://mosquitto.test:5000/management/parameters-control`,{
+              "ServiceParameterLimits":
+                [
+                  {
+                    "ControlUnit": "Right",
+                    "ParameterUnit": "mA",
+                    "ParameterLimit": baseData.value_val
+                  },
+                ]
+            })
+              .then(response => {
+              })
+              .catch(e => {
+                this.errors.push(e)
+              });
+
+            break;
+          }
+          default: {
+            console.log('wrong switch parameter');
             break;
           }
         }
 
-      });
-    },
-    mqtt: {
-      'Temperature measurement'(data) {
-        var temp_obj = JSON.parse(data);
-        //console.log(temp_obj);
-        var baseData = {
-          date: this.$moment(Date.now()).format("DD/MM/YYYY hh:mm:ss"),
-          limit: this.$data.limits.temperature_limit,
-          status: 'Normal',
-          value: temp_obj.SensorValue
-        };
-
-        console.log('Temperature sample received', baseData.value);
-
-        temperatureData.splice(0, 1);
-        temperatureData.push({x: this.$moment(Date.now()), y: baseData.value});
-        this.$data.base_index.temperature_index = database_configuration.temperature_index;
-        database_configuration.temperature_index = database_configuration.temperature_index + 1;
-
-        this.writeInBase(baseNames.temperature_base, this.$data.base_index.temperature_index, baseData);
-        this.$events.emit(events.temperature, {x: this.$moment(Date.now()), y: baseData.value});
-        //eventBus.$emit(events.temperature, {x: this.$moment(Date.now()), y: baseData.value});
-      },
-      'Current measurement'(data) {
-        var temp_obj = JSON.parse(data);
-        //console.log('current measurement mqtt sample', data);
-
-        var baseData = {
-          date: this.$moment(Date.now()).format("DD/MM/YYYY hh:mm:ss"),
-          limit: this.$data.limits.current_limit,
-          status: 'Normal',
-          value: temp_obj.SensorValue
-        };
-
-        console.log('Current sample received', baseData.value);
-
-        this.$data.base_index.current_index = database_configuration.current_index;
-        database_configuration.current_index = database_configuration.current_index + 1;
-        currentData.splice(0, 1);
-        currentData.push({x:this.$moment(Date.now()),y:baseData.value});currentData.push({x:this.$moment(Date.now()),y:baseData.value});
-        currentData.push({x: baseData.date, y: baseData.value});
-
-
-        this.$events.emit(events.current, {x: this.$moment(Date.now()), y: baseData.value})
-        this.writeInBase(baseNames.current_base, this.$data.base_index.current_index, baseData);
-       // eventBus.$emit(events.current, {x: this.$moment(Date.now()), y: baseData.value})
-      },
-
-      'MotorSpeed'(data) {
-        var temp_obj = JSON.parse(data);
-        console.log('Motor speed mqtt received', temp_obj);
-
-        var baseData = {
-          date: this.$moment(Date.now()).format("DD/MM/YYYY hh:mm:ss"),
-          limit: this.$data.limits.speed_limit,
-          status: 'Normal',
-          value: temp_obj.ParameterValue
-        };
-
-        this.$data.base_index.speed_index = database_configuration.speed_index;
-        database_configuration.speed_index = database_configuration.speed_index + 1;
-
-        this.writeInBase(baseNames.speed_base, this.$data.base_index.speed_index, baseData);
-        var roundedVal = Number(baseData.value).toFixed(2);
-        speedData.splice(0, 1);
-        speedData.push({x: this.$moment(Date.now()), y: roundedVal});
-        this.$data.mySpeedIndex = this.$data.mySpeedIndex + 1;
-         this.$events.emit(events.speed, {x: this.$moment(Date.now()), y: roundedVal})
-        // eventBus.$emit(events.speed, {x: this.$moment(Date.now()), y: roundedVal})
-      }
-    },
-    methods: {
-      writeInBase(basename, data_index, data) {
-        db.collection(basename).doc('ID' + data_index).set({data});
-
-      },
-      getConfiguration() {
-        var configuration = db.collection(baseNames.configuration_base);
-        var configList = configuration.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-
-              if (doc.id == 'config') {
-                // console.log('This is configuration');
-                var myConfig = doc.data();
-                database_configuration.command_index = myConfig.command_index;
-                database_configuration.speed_index = myConfig.speed_index;
-                database_configuration.current_index = myConfig.current_index;
-                database_configuration.temperature_index = myConfig.temperature_index;
-              }
-            });
-          })
-          .catch(err => {
-            console.log('Error getting documents', err);
-          });
-        // console.log(database_configuration);
-      },
-      updateConfiguration() {
-        db.collection(baseNames.configuration_base).doc('config').set(database_configuration);
-      },
-      getDatabase(basename, database) {
-        var local_database = db.collection(basename);
-        var myDataArray = local_database.orderBy("data", "desc").limit(20);
-        var configList = myDataArray.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              var myData = doc.data();
-              // console.log({x: this.$moment(myData.data.date), y: myData.data.value});
-              database.unshift({x: myData.data.date, y: myData.data.value});
-              //database.unshift({x:this.$moment(myData.data.date),y:myData.data.value});
-            })
-          })
-          .catch(err => {
-            console.log('Error getting database', err);
-          });
       }
     }
-
   }
 
 </script>

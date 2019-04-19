@@ -42,11 +42,11 @@
                   offsetY: -10,
                   show: true,
                   color: "#555",
-                  fontSize: "60px"
+                  fontSize: "55px"
                 },
                 value: {
                   color: "#111",
-                  fontSize: "20px",
+                  fontSize: "25px",
                   show: true
                 }
               }
@@ -70,7 +70,7 @@
           stroke: {
             lineCap: "round",
           },
-          labels: [this.$props.newValue]
+          labels: [this.$props.newValue.toFixed(2)]
         }
       }
     }
@@ -78,6 +78,7 @@
     mounted() {
 
       console.log('speed_chart mounted');
+      this.$data.deviceData.devValue = this.$data.deviceData.devValue;
 
       var load = Math.ceil((this.$data.deviceData.devValue / this.$data.deviceData.devLimit) * 100);
       this.$refs.radialChart.updateSeries([load]);
@@ -87,18 +88,20 @@
 
       this.$events.on(this.$data.deviceData.eventSample, data => {
 
-        // console.log('speed chart sample data');
+        console.log('speed chart sample data');
 
         // var temp_obj = JSON.parse(data);
      //   console.log(data);
 
-        this.$data.deviceData.devValue = data.y;
+        this.$data.deviceData.devValue = data.value.toFixed(2);
+        this.$data.deviceData.devLimit = data.limit;
 
-        console.log(this.$data.deviceData.devValue);
+        console.log(this.$data.deviceData.devValue, this.$data.deviceData.devLimit);
         this.$refs.radialChart.updateOptions({
           labels: [this.$data.deviceData.devValue],
         });
-        var load = Math.ceil((this.$data.deviceData.devValue / this.$data.deviceData.devLimit) * 100);
+        var load = Math.abs(Math.ceil((this.$data.deviceData.devValue / this.$data.deviceData.devLimit) * 100));
+
       //  console.log(load);
         this.$refs.radialChart.updateSeries([load]);
       });
@@ -164,8 +167,6 @@
       // });
 
     }
-
-
   }
 </script>
 

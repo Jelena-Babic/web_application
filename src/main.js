@@ -11,6 +11,9 @@ import VueApexCharts from 'vue-apexcharts'
 import VueMoment from 'vue-moment'
 import moment from 'moment'
 import VueEvents from 'vue-event-handler'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
 
 import Default from './layouts/Default.vue';
 import NoSidebar from './layouts/NoSidebar.vue';
@@ -35,6 +38,8 @@ Vue.filter('formatDate', function(value) {
     return moment(String(value)).format('MM/DD/YYYY hh:mm')
   }
 });
+
+Vue.use(VueAxios,axios);
 
 
 Vue.use(Vuetify, {

@@ -17,10 +17,6 @@
 <script>
   import VueExtendLayouts from 'vue-extend-layout'
   import Sidebar from './components/Sidebar.vue'
-  import {eventBus} from "./main";
-  import {db} from "./main";
-  import {events, limitEvents, baseNames, getValue, deviceValues, database_configuration} from "./constants";
-  import {speedData, currentData, temperatureData} from './deviceData';
 
   const default_layout ="default";
 
@@ -33,18 +29,7 @@
     },
     data() {
       return {
-        base_index: {
-          speed_index: 0,
-          current_index: 0,
-          temperature_index: 0,
-          command_index: 0,
-        },
-        limits: {
-          speed_limit: deviceValues.speed,
-          current_limit: deviceValues.current,
-          temperature_limit: deviceValues.temperature,
-        },
-        mySpeedIndex:20
+
       }
     },
     components: {

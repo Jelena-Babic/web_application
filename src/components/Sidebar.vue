@@ -15,12 +15,12 @@
                 av_timer
               </i>Dashboard</router-link>
           </li>
-          <li class="nav-item" @click="routeName='Time Charts'" >
-            <router-link to="/timeCharts" class="nav-link" activeClass="active" >
-              <i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px ">
-                insert_chart
-              </i>Charts</router-link>
-          </li>
+          <!--<li class="nav-item" @click="routeName='Time Charts'" >-->
+            <!--<router-link to="/timeCharts" class="nav-link" activeClass="active" >-->
+              <!--<i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px ">-->
+                <!--insert_chart-->
+              <!--</i>Charts</router-link>-->
+          <!--</li>-->
 
           <li class="nav-item" @click="routeName='Limits'">
             <router-link to="/setLimits" class="nav-link" activeClass="active" >

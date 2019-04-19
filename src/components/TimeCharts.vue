@@ -3,7 +3,7 @@
 
     <div class="row">
       <div class="span4">
-        <MultipleCharts></MultipleCharts>
+        <!--<MultipleCharts></MultipleCharts>-->
         <!--<chart-test ></chart-test>-->
       </div>
         <!--<MultiAxisChart-->
@@ -64,10 +64,6 @@
     name: "TimeCharts",
     data(){
       return {
-        chart1: TimechartConfiguration.speedChart,
-        chart2: TimechartConfiguration.temperatureChart,
-        chart3: TimechartConfiguration.currentChart,
-
       }
     },
     components: {
