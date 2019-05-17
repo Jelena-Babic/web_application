@@ -12,7 +12,8 @@
     </div>
     <div class="card-body">
     <div class="row">
-      <div class="col-sm-4" style="margin-top: 30px">
+      <div class="col-sm-4" >
+        <!-- style="margin-top: 30px" -->
         <div class="container">
           <div class="row" style="padding-left: 10px">
             <span style="font-size:18px;">Status: </span>
@@ -25,7 +26,7 @@
 
           <div class="row" style="padding-left: 10px; padding-top: 20px">
             <span style="font-size:18px;">Updated:</span>
-            <span style="font-size: 20px; font-weight: bolder">{{lastUpdate}}</span>
+            <span style="font-size: 19px; font-weight: bolder;">{{lastUpdate}}</span>
           </div>
         </div>
       </div>
@@ -44,44 +45,43 @@
 
 <script>
   import SpeedChart from './SpeedChart.vue'
-  import {eventBus} from "../../main";
 
   export default {
     name: "DataCard",
-    props: [
-      'chartTitle',
-      'chartValue',
-      'chartStatus',
-      'chartLimit',
-      'chartUpdateTime',
-      'limitEvent',
-      'sampleEvent'
-    ],
+    props:{data:Object},
     data() {
       return {
-        title: this.$props.chartTitle,
-        status: this.$props.chartStatus,
-        limit: this.$props.chartLimit,
-        lastUpdate: this.$props.chartUpdateTime,
-        value: this.$props.chartValue,
-        eventName: this.$props.sampleEvent,
-        eventLimitName: this.$props.limitEvent
+        title: this.$props.data.chartTitle,
+        status: this.$props.data.chartStatus,
+        limit: this.$props.data.chartLimit,
+        lastUpdate: this.$props.data.chartUpdateTime,
+        value: this.$props.data.chartValue,
+        eventName: this.$props.data.sampleEvent,
+        eventLimitName: this.$props.data.limitEvent
       }
     },
     mounted() {
-      console.log(this.$props);
+     // console.log('data card props',this.$props.data);
 
-      eventBus.$on(this.$data.eventLimitName, (data) => {
+      this.$events.$on(this.$data.eventLimitName, (data) => {
         // console.log('Data card event');
-        // console.log('limit event',this.$data.eventLimitName, data.value);
+         console.log('limit event',this.$data.eventLimitName, data.value);
 
         this.$data.limit = data;
       });
 
-      // eventBus.$on(this.$data.eventName,  (data) => {
-      //   console.log('Sample eventdata card ');
-      //   console.log(data);
-      // });
+      this.$events.$on(this.$data.eventName,  (data) => {
+       // console.log('Sample event data card ');
+       // console.log(data);
+        // var date1 = this.$data.lastUpdate;
+        // var date2 =this.$moment(data.x);
+        // var diff = date2.diff(date1, 'seconds');
+        // console.log(diff);
+        this.$data.lastUpdate=data.date;
+        this.$data.value = data.value;
+        this.$data.status = data.status;
+        this.$data.limit = data.limit;
+      });
 
     },
     components: {

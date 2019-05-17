@@ -1,55 +1,51 @@
 <template>
   <div id="home">
-    <div class="row">
-      <div class="span4" style="margin-top: 20px; margin-left: 30px;padding-right: 30px ">
-        <vue_device_data :deviceID="deviceData.deviceID"
-                         :chart-status="deviceData.deviceStatus"
-                         :chart-value="deviceData.deviceLoad"
-                         :chart-update-time="deviceData.deviceUpdateTime"
-                         :load-event="deviceData.deviceLoadEvent"
-                         >
-        </vue_device_data>
-      </div>
-      <div class="span8" style="margin-top: 20px;">
-        <vue_chart
-          :height="380"
-          :width="900"
-          :chart_title="my_chart_title"
-          :min_value="200"
-          :max_value="800"
-          :sample_event="chartSample"
-          :limit_event="chartLimit"
-          :sample_array="chartArray"
-        ></vue_chart>
+    <div class="card" style="margin-left: 30px; margin-top: 20px; border: none; margin-right:30px ">
+  <div class="card-header"
+           style="border: none;
+             background-color: darkseagreen;
+             font-weight: bolder;
+              font-size: 30px">
+        <h1>Left Side</h1>
+  </div>
+
+      <div class="card-body" style="background-color: #F2F4F5; border: none; margin-left:-2px;">
+
+        <div class="row">
+          <div class="span4" style="padding-right: 30px; padding-bottom:20px">
+            <vue_data :data="LeftSideData.speedData"></vue_data>
+          </div>
+          <div class="span4" style="padding-right: 30px; padding-bottom:20px">
+            <vue_data :data="LeftSideData.temperatureData"></vue_data>
+          </div>
+          <div class="span4" style="padding-bottom:20px">
+            <vue_data :data="LeftSideData.currentData"></vue_data>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="span4" style="margin-top: 10px; margin-left: 30px; padding-right: 30px">
-        <vue_data :chart-title="speedData.chartTitle"
-                  :chart-value="speedData.chartValue"
-                  :chart-status="speedData.chartStatus"
-                  :chart-limit="speedData.chartLimit"
-                  :chart-update-time="speedData.chartUpdateTime"
-                  :limit-event="speedData.limitEvent"
-                  :sample-event="speedData.sampleEvent"></vue_data>
+
+    <div class="card" style="margin-left: 30px; margin-top: 20px; border: none; margin-right:30px ">
+      <div class="card-header"
+           style="border: none;
+             background-color: darkseagreen;
+             font-weight: bolder;
+              font-size: 30px">
+        <h1>Right Side</h1>
       </div>
-      <div class="span4" style="margin-top: 10px; padding-right: 30px">
-        <vue_data :chart-title="temperatureData.chartTitle"
-                  :chart-value="temperatureData.chartValue"
-                  :chart-status="temperatureData.chartStatus"
-                  :chart-limit="temperatureData.chartLimit"
-                  :chart-update-time="temperatureData.chartUpdateTime"
-                  :limit-event="temperatureData.limitEvent"
-                  :sample-event="temperatureData.sampleEvent"></vue_data>
-      </div>
-      <div class="span4" style="margin-top: 10px; padding-right: 30px">
-        <vue_data :chart-title="currentData.chartTitle"
-                  :chart-value="currentData.chartValue"
-                  :chart-status="currentData.chartStatus"
-                  :chart-limit="currentData.chartLimit"
-                  :chart-update-time="currentData.chartUpdateTime"
-                  :limit-event="currentData.limitEvent"
-                  :sample-event="currentData.sampleEvent"></vue_data>
+
+      <div class="card-body" style="background-color: #F2F4F5; border: none; margin-left:-2px">
+        <div class="row">
+          <div class="span4" style="padding-right: 30px; padding-bottom:20px">
+            <vue_data :data="RightSideData.speedData"></vue_data>
+          </div>
+          <div class="span4" style="padding-right: 30px; padding-bottom:20px">
+            <vue_data :data="RightSideData.temperatureData"></vue_data>
+          </div>
+          <div class="span4" style="padding-bottom:20px" >
+            <vue_data :data="RightSideData.currentData"></vue_data>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -57,68 +53,88 @@
 </template>
 
 <script>
-  import SpeedCard from './elements/SpeedCard.vue';
-  import Line from './elements/Line.vue';
-  import {eventBus} from "../main";
   import DataCard from './elements/DataCard';
-  import DeviceData from './elements/DeviceData.vue';
-  import {events, limitEvents, deviceValues, getValue} from "../constants";
-  import {speedData} from "../deviceData";
+  import {events, limitEvents, getValue} from "../constants";
+  import {database_values} from "../deviceData";
+  import axios from 'axios'
 
   export default {
     name: "Home",
     components: {
-      vue_speed: SpeedCard,
-      vue_chart: Line,
       vue_data: DataCard,
-      vue_device_data: DeviceData
     },
     data() {
       return {
-        my_chart_title: 'Speed Time Chart',
-        chartSample: events.speed,
-        chartLimit: limitEvents.speed,
-        chartArray:speedData,
 
-        deviceData: {
-          deviceID: 'MD110025',
-          deviceStatus: 'Normal',
-          deviceLoad: '30',
-          deviceUpdateTime: '3 min ago',
-          deviceLoadEvent: 'loadEvent',
+        LeftSideData: {
+          speedData: {
+            chartTitle: 'Speed:',
+            chartValue: database_values.sample_value.left_side.speed.value,
+            chartStatus: database_values.sample_value.left_side.speed.status,
+            chartLimit: database_values.sample_value.left_side.speed.limit,
+            chartUpdateTime: database_values.sample_value.left_side.speed.date,
+            limitEvent: limitEvents.left_side.speed,
+            sampleEvent: events.left_side.speed
+          },
+          temperatureData: {
+            chartTitle: 'Temperature:',
+            chartValue: database_values.sample_value.left_side.temperature.value,
+            chartStatus: database_values.sample_value.left_side.temperature.status,
+            chartLimit: database_values.sample_value.left_side.temperature.limit,
+            chartUpdateTime: database_values.sample_value.left_side.temperature.date,
+            limitEvent: limitEvents.left_side.temperature,
+            sampleEvent: events.left_side.temperature
+          },
+
+          currentData: {
+            chartTitle: 'Current:',
+            chartValue: database_values.sample_value.left_side.current.value,
+            chartStatus: database_values.sample_value.left_side.current.status,
+            chartLimit: database_values.sample_value.left_side.current.limit,
+            chartUpdateTime: database_values.sample_value.left_side.current.date,
+            limitEvent: limitEvents.left_side.current,
+            sampleEvent: events.left_side.current
+          }
         },
 
-        speedData: {
-          chartTitle: 'Speed:',
-          chartValue: '80',
-          chartStatus: 'Normal',
-          chartLimit: getValue('Speed',deviceValues.speed),
-          chartUpdateTime: '10 min ago',
-          limitEvent: limitEvents.speed,
-          sampleEvent: events.speed
-        },
+        RightSideData: {
+          speedData: {
+            chartTitle: 'Speed:',
+            chartValue: database_values.sample_value.right_side.speed.value,
+            chartStatus: database_values.sample_value.right_side.speed.status,
+            chartLimit: database_values.sample_value.right_side.speed.limit,
+            chartUpdateTime: database_values.sample_value.right_side.speed.date,
+            limitEvent: limitEvents.right_side.speed,
+            sampleEvent: events.right_side.speed
+          },
 
-        temperatureData: {
-          chartTitle: 'Temperature:',
-          chartValue: '20',
-          chartStatus: 'Normal',
-          chartLimit: getValue('Temperature',deviceValues.temperature),
-          chartUpdateTime: '10 min ago',
-          limitEvent: limitEvents.temperature,
-          sampleEvent: events.temperature
-        },
+          temperatureData: {
+            chartTitle: 'Temperature:',
+            chartValue: database_values.sample_value.right_side.temperature.value,
+            chartStatus: database_values.sample_value.right_side.temperature.status,
+            chartLimit: database_values.sample_value.right_side.temperature.limit,
+            chartUpdateTime: database_values.sample_value.right_side.temperature.date,
+            limitEvent: limitEvents.right_side.temperature,
+            sampleEvent: events.right_side.temperature
+          },
 
-        currentData: {
-          chartTitle: 'Current:',
-          chartValue: '20',
-          chartStatus: 'Normal',
-          chartLimit: getValue('Current',deviceValues.current),
-          chartUpdateTime: '10 min ago',
-          limitEvent: limitEvents.current,
-          sampleEvent: events.current
+          currentData: {
+            chartTitle: 'Current:',
+            chartValue: database_values.sample_value.right_side.current.value,
+            chartStatus: database_values.sample_value.right_side.current.status,
+            chartLimit: database_values.sample_value.right_side.current.limit,
+            chartUpdateTime: database_values.sample_value.right_side.current.date,
+            limitEvent: limitEvents.right_side.current,
+            sampleEvent: events.right_side.current
+          }
         }
       }
     },
+    created() {
+
+     console.log('created database value', database_values);
+    
+    }
   }
 </script>
 

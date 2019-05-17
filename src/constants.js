@@ -1,37 +1,88 @@
-export const events = {
-  current: 'Current sample event',
-  temperature: 'Temperature sample event',
-  speed: 'Speed sample event',
-  command: 'New command event'
+export const  events = {
+
+  command: 'command event',
+
+  left_side: {
+    current: 'Current sample left side event',
+    temperature: 'Temperature sample left side event',
+    speed: 'Speed sample event left side ',
+    command: 'New command event left side'
+  },
+  right_side: {
+    current: 'Current sample event right side',
+    temperature: 'Temperature sample event right side',
+    speed: 'Speed sample event right side',
+    command: 'New command event right side'
+  }
 };
 
 export const limitEvents = {
-  current: 'Current limit event',
-  speed: 'Speed limit event',
-  temperature: 'Temperature limit event'
+
+  left_side: {
+    current: 'Current limit left side event',
+    speed: 'Speed limit left side  event',
+    temperature: 'Temperature limit left side  event'
+  },
+  right_side: {
+    current: 'Current limit right side event',
+    speed: 'Speed limit right side  event',
+    temperature: 'Temperature limit right side  event'
+  }
 };
 
-export const baseNames = {
-  current_base: 'current',
-  speed_base: 'speed',
-  temperature_base: 'temperature',
-  command_base: 'command',
-  configuration_base: 'configuration'
-}
+export const baseNames = Object.freeze({
 
-export var database_configuration = {
-  command_index: 0,
-  speed_index: 0,
-  current_index: 0,
-  temperature_index: 0,
-}
+  configuration_base: 'configuration',
+
+  command_base: 'commands',
+
+  sample_base: {
+    left_side: {
+      speed_base: 'sample_left_speed',
+      temperature_base: 'sample_left_temperature',
+      current_base: 'sample_left_current',
+    },
+    right_side: {
+      speed_base: 'sample_right_speed',
+      temperature_base: 'sample_right_temperature',
+      current_base: 'sample_right_current',
+    }
+  },
+  limit_base: {
+    left_side: {
+      speed_base: 'limit_left_speed',
+      temperature_base: 'limit_left_temperature',
+      current_base: 'limit_left_current',
+    },
+    right_side: {
+      speed_base: 'limit_right_speed',
+      temperature_base: 'limit_right_temperature',
+      current_base: 'limit_right_current',
+    }
+  },
+});
+
+export const messageLogLength = Object.freeze({msg_number: 50});
+
+export const limitTypes = {
+    left_side: {
+      speed: 'limit_left_speed',
+      temperature: 'limit_left_temperature',
+      current: 'limit_left_current',
+    },
+    right_side: {
+      speed: 'limit_right_speed',
+      temperature: 'limit_right_temperature',
+      current: 'limit_right_current',
+    }
+};
 
 export const limitValues = {
 
   Speed: {
-    Low: 500,
-    Medium: 800,
-    High: 1000
+    Low: 0,
+    Medium: 1,
+    High: 2
   },
 
   Current: {
@@ -48,22 +99,73 @@ export const limitValues = {
 
 };
 
+export function getSpeedValue(speed)
+{
+  var my_limit_value = 0
+
+  switch(speed)
+  {
+    case 0: 
+    my_limit_value = 0;
+    break;
+   
+    case 1:
+    my_limit_value = 1000;
+    break;
+    
+    case 2:
+    my_limit_value = 2500;
+    break;
+    
+  }
+
+  return my_limit_value;
+
+}
+
+export function castSpeedValue(speed)
+{
+  var my_limit_value = 0;
+  
+  switch(speed)
+  {
+    case 0:
+    my_limit_value = 0;
+    break;
+    
+    case 1000:
+    my_limit_value = 1;
+    break;
+
+    case 2500:
+    my_limit_value = 2;
+    break;
+
+  }
+
+  return my_limit_value;
+}
+
 export function getValue(limit_type, limit_value) {
 
   var my_limit_type = limitValues.Speed;
+
   switch (limit_type) {
-    case 'Speed': {
+    case limitTypes.right_side.speed:
+    case limitTypes.left_side.speed:
       my_limit_type = limitValues.Speed;
       break;
-    }
-    case 'Current': {
+
+    case limitTypes.right_side.current:
+    case limitTypes.left_side.current:
       my_limit_type = limitValues.Current;
       break;
-    }
-    case 'Temperature': {
+
+    case limitTypes.right_side.temperature:
+    case limitTypes.left_side.temperature:
       my_limit_type = limitValues.Temperature;
       break;
-    }
+
   }
 
   var my_limit_value = my_limit_type.Low;
@@ -90,33 +192,8 @@ export var deviceValues = {
   speed: 'Low',
   temperature: 'Low',
   current: 'Low'
-}
-
-export const TimechartConfiguration = {
-
-  speedChart: {
-    title: 'Speed Chart',
-    minValue: '200',
-    maxValue: '800',
-    sampleEvent: events.speed,
-    limitEvent: limitEvents.speed
-  },
-
-  temperatureChart: {
-    title: 'Temperature Chart',
-    minValue: '20',
-    maxValue: '30',
-    sampleEvent: events.temperature,
-    limitEvent: limitEvents.temperature
-  },
-
-  currentChart: {
-    title: 'Current Chart',
-    minValue: '0',
-    maxValue: '50',
-    sampleEvent: events.current,
-    limitEvent: limitEvents.current
-  },
 };
+
+
 
 
