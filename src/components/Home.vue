@@ -6,7 +6,7 @@
              background-color: darkseagreen;
              font-weight: bolder;
               font-size: 30px">
-        <h1>Left Side</h1>
+        <h1>Unsecured communication</h1>
   </div>
 
       <div class="card-body" style="background-color: #F2F4F5; border: none; margin-left:-2px;">
@@ -31,7 +31,7 @@
              background-color: darkseagreen;
              font-weight: bolder;
               font-size: 30px">
-        <h1>Right Side</h1>
+        <h1>Secured communication</h1>
       </div>
 
       <div class="card-body" style="background-color: #F2F4F5; border: none; margin-left:-2px">
