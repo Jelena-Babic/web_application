@@ -27,7 +27,7 @@ var Base = false;
     created() {
       console.log('app created');
 
-      axios.get('https://192.168.1.242/management/parameters-control')
+      axios.get('https://192.168.0.103/management/parameters-control')
         .then(response => {
             console.log('this is response data',response.data);
             database_values.limit_value.right_side.current.value_val = response.data.ServiceParameterLimits[0].ParameterLimit;
@@ -67,11 +67,11 @@ var Base = false;
     },
     mqtt: {
 
-      'Temperature measurement'(data) {
+      'TemperatureMeasurement'(data) {
         //console.log('Temperature Sample');
         this.processSample(data, 'Temperature');
       },
-      'Current measurement'(data) {
+      'CurrentMeasurement'(data) {
      //   console.log('Current sample')
          this.processSample(data, 'Current');
       },
@@ -179,7 +179,7 @@ var Base = false;
           case limitTypes.left_side.temperature: {
             console.log('left temperature is set' , baseData.value_val);
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
                   "ServiceParameterLimits":
                     [
                       {
@@ -224,7 +224,7 @@ var Base = false;
 
              console.log('left speed is', baseData.value_val, 'left speed code is', temp_val);
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -249,7 +249,7 @@ var Base = false;
           case limitTypes.left_side.current: {
             console.log('left current is set');
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -274,7 +274,7 @@ var Base = false;
           case limitTypes.right_side.temperature: {
             console.log('right temperature is set');
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -317,7 +317,7 @@ var temp_val = 0;
 
              console.log('right speed is', baseData.value_val, 'right speed code is', temp_val);
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -342,7 +342,7 @@ var temp_val = 0;
           case limitTypes.right_side.current: {
             console.log('left current is set');
 
-            axios.post('https://192.168.1.242/management/parameters-control',{
+            axios.post('https://192.168.0.103/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {

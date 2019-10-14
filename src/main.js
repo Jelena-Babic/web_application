@@ -48,7 +48,7 @@ Vue.use(Vuetify, {
   }
 });
 
-Vue.use(VueMqtt, 'ws://192.168.1.103:1884/ws',{clientId: 'WebClient-' + parseInt(Math.random()*1000)});
+Vue.use(VueMqtt, 'ws://192.168.0.103:1884/ws',{clientId: 'WebClient-' + parseInt(Math.random()*1000)});
 
 Vue.use(VueRouter);
 Vue.use(VueApexCharts);
