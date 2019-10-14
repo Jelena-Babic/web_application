@@ -11,16 +11,20 @@
           <li class="nav-item" @click="routeName='Dashboard'">
 
             <router-link to="/home" class="nav-link" activeClass="active" >
-              <i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px">
+              <!--<i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px">
                 av_timer
-              </i>Dashboard</router-link>
+              </i>-->
+              <timer></timer>
+              Dashboard</router-link>
           </li>
 
           <li class="nav-item" @click="routeName='Limits'">
             <router-link to="/setLimits" class="nav-link" activeClass="active" >
-              <i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px">
+              <!--<i class="material-icons" style="vertical-align: text-bottom; height: 20px; margin-right: 5px">
                 settings
-              </i>Limits</router-link>
+              </i>-->
+              <settings></settings>
+              Limits</router-link>
           </li>
 
         </ul>
@@ -33,6 +37,9 @@
 
 <script>
   import Topbar from './Topbar.vue'
+  import Settings from 'vue-material-design-icons/Settings.vue';
+  import Timer from 'vue-material-design-icons/Clock.vue';
+
   export default {
     name: "Sidebar",
     data(){
@@ -41,7 +48,9 @@
       }
     },
     components:{
-      app_topbar: Topbar
+      app_topbar: Topbar,
+      settings: Settings,
+      timer: Timer
     }
 
   }

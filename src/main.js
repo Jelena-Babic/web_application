@@ -11,9 +11,16 @@ import VueEvents from 'vue-event-handler'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+//import './custom.scss'
+
+
+Vue.use(BootstrapVue);
+
 import Default from './layouts/Default.vue';
 import NoSidebar from './layouts/NoSidebar.vue';
-
 
 Vue.component('default-layout', Default);
 Vue.component('no-sidebar-layout', NoSidebar);
@@ -41,7 +48,7 @@ Vue.use(Vuetify, {
   }
 });
 
-Vue.use(VueMqtt, 'ws://192.168.1.242:1884/ws',{clientId: 'WebClient-' + parseInt(Math.random()*1000)});
+Vue.use(VueMqtt, 'ws://192.168.1.103:1884/ws',{clientId: 'WebClient-' + parseInt(Math.random()*1000)});
 
 Vue.use(VueRouter);
 Vue.use(VueApexCharts);
