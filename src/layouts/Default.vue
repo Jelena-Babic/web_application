@@ -27,7 +27,7 @@ var Base = false;
     created() {
       console.log('app created');
 
-      axios.get('https://192.168.0.103/management/parameters-control')
+      axios.get('https://linaro-alip/management/parameters-control')
         .then(response => {
             console.log('this is response data',response.data);
             database_values.limit_value.right_side.current.value_val = response.data.ServiceParameterLimits[0].ParameterLimit;
@@ -50,7 +50,7 @@ var Base = false;
             })
                .catch(e => {
                     console.log(e.response);
-                       // this.errors.push(e)
+                    this.errors.push(e)
                   });
 
     },
@@ -179,7 +179,7 @@ var Base = false;
           case limitTypes.left_side.temperature: {
             console.log('left temperature is set' , baseData.value_val);
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
                   "ServiceParameterLimits":
                     [
                       {
@@ -194,7 +194,7 @@ var Base = false;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
 
@@ -202,16 +202,16 @@ var Base = false;
             break;
           }
           case limitTypes.left_side.speed: {
-            
+
 
             var temp_val = 0;
-            
+
               switch(baseData.value_val)
               {
                 case "0":
                 temp_val = 0;
                 break;
-                
+
                 case "1000":
                 temp_val = 1;
                 break;
@@ -224,7 +224,7 @@ var Base = false;
 
              console.log('left speed is', baseData.value_val, 'left speed code is', temp_val);
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -239,7 +239,7 @@ var Base = false;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
             database_values.limit_value.left_side.speed.value_val = baseData.value_val;
@@ -249,7 +249,7 @@ var Base = false;
           case limitTypes.left_side.current: {
             console.log('left current is set');
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -264,7 +264,7 @@ var Base = false;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
             database_values.limit_value.left_side.current.value_val = baseData.value_val
@@ -274,7 +274,7 @@ var Base = false;
           case limitTypes.right_side.temperature: {
             console.log('right temperature is set');
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -289,7 +289,7 @@ var Base = false;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
             database_values.limit_value.right_side.temperature.value_val = baseData.value_val
@@ -298,13 +298,13 @@ var Base = false;
           }
           case limitTypes.right_side.speed: {
 var temp_val = 0;
-            
+
               switch(baseData.value_val)
               {
                 case "0":
                 temp_val = 0;
                 break;
-                
+
                 case "1000":
                 temp_val = 1;
                 break;
@@ -317,7 +317,7 @@ var temp_val = 0;
 
              console.log('right speed is', baseData.value_val, 'right speed code is', temp_val);
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -332,17 +332,17 @@ var temp_val = 0;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
             database_values.limit_value.right_side.speed.value_val = baseData.value_val;
-           
+
             break;
           }
           case limitTypes.right_side.current: {
             console.log('left current is set');
 
-            axios.post('https://192.168.0.103/management/parameters-control',{
+            axios.post('https://linaro-alip/management/parameters-control',{
               "ServiceParameterLimits":
                 [
                   {
@@ -357,7 +357,7 @@ var temp_val = 0;
               })
               .catch(e => {
                 console.log(e.message);
-                //this.errors.push(e)
+                this.errors.push(e)
               });
 
              database_values.limit_value.right_side.current.value_val = baseData.value_val
