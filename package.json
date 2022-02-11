@@ -10,7 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "ajv": "^6.10.0",
+    "ajv": "^6.12.3",
     "apexcharts": "^3.6.3",
     "axios": "^0.18.1",
     "bootstrap": "^4.3.1",
